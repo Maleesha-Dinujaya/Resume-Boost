@@ -12,6 +12,18 @@ export interface AnalyzeResponse {
   highlights: string[];
 }
 
+// Token plumbing — NEW
+let authToken: string | null = null;
+export function setAuthToken(token: string | null) {
+  authToken = token;
+}
+
+function authHeaders(extra?: Record<string, string>) {
+  return authToken
+    ? { Authorization: `Bearer ${authToken}`, ...(extra || {}) }
+    : { ...(extra || {}) };
+}
+
 export interface HistoryItem {
   id: string;
   createdAt: string;
@@ -31,9 +43,7 @@ export const api = {
   async analyze(request: AnalyzeRequest): Promise<AnalyzeResponse> {
     const response = await fetch(`${API_BASE_URL}/analyze`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         resume_text: request.resumeText,
         job_description: request.jobDescription,
@@ -49,7 +59,9 @@ export const api = {
   },
 
   async getHistory(): Promise<{ items: HistoryItem[] }> {
-    const response = await fetch(`${API_BASE_URL}/history`);
+    const response = await fetch(`${API_BASE_URL}/history`, {
+      headers: authHeaders(),
+    });
     if (!response.ok) {
       throw new Error('Failed to load history');
     }
@@ -57,7 +69,9 @@ export const api = {
   },
 
   async getHistoryItem(id: string): Promise<HistoryDetail | null> {
-    const response = await fetch(`${API_BASE_URL}/history/${id}`);
+    const response = await fetch(`${API_BASE_URL}/history/${id}`, {
+      headers: authHeaders(),
+    });
     if (response.status === 404) {
       return null;
     }
@@ -70,6 +84,7 @@ export const api = {
   async deleteHistoryItem(id: string): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/history/${id}`, {
       method: 'DELETE',
+      headers: authHeaders(),
     });
     if (!response.ok) {
       throw new Error('Failed to delete analysis');
