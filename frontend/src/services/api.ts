@@ -1,19 +1,15 @@
 export interface AnalyzeRequest {
   resumeText: string;
-  jobDescription: string;
-  role?: string;
+  jobDescription?: string;
   emphasis?: string[];
 }
 
 export interface AnalyzeResponse {
   id: string;
-  createdAt: string;
   score: number;
   matchedSkills: string[];
   improvementAreas: string[];
   highlights: string[];
-  resumePreview?: string;
-  jobTitle?: string;
 }
 
 export interface HistoryItem {
@@ -21,6 +17,12 @@ export interface HistoryItem {
   createdAt: string;
   role: string;
   score: number;
+}
+
+export interface HistoryDetail extends AnalyzeResponse {
+  createdAt: string;
+  resumePreview?: string;
+  jobTitle?: string;
 }
 
 const API_BASE_URL = 'http://localhost:8000';
@@ -35,7 +37,6 @@ export const api = {
       body: JSON.stringify({
         resume_text: request.resumeText,
         job_description: request.jobDescription,
-        role: request.role,
         emphasis: request.emphasis,
       }),
     });
@@ -55,7 +56,7 @@ export const api = {
     return response.json();
   },
 
-  async getHistoryItem(id: string): Promise<AnalyzeResponse | null> {
+  async getHistoryItem(id: string): Promise<HistoryDetail | null> {
     const response = await fetch(`${API_BASE_URL}/history/${id}`);
     if (response.status === 404) {
       return null;

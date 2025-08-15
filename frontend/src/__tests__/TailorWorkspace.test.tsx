@@ -90,12 +90,11 @@ describe('TailorWorkspace', () => {
     fireEvent.change(resumeTextarea, { target: { value: 'Software engineer with React experience' } });
     fireEvent.change(jobDescTextarea, { target: { value: 'Looking for React developer' } });
     fireEvent.click(analyzeButton);
-    
+
     await waitFor(() => {
       expect(api.analyze).toHaveBeenCalledWith({
         resumeText: 'Software engineer with React experience',
         jobDescription: 'Looking for React developer',
-        role: undefined,
         emphasis: undefined
       });
     });
