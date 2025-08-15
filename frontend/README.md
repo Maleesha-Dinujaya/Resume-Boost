@@ -71,7 +71,7 @@ src/
 │   ├── Privacy.tsx     # Privacy policy
 │   └── NotFound.tsx    # 404 error page
 ├── services/           # Business logic and APIs
-│   ├── mockApi.ts      # In-memory mock API
+│   ├── api.ts          # Backend API client
 │   └── storage.ts      # Local storage utilities
 ├── __tests__/          # Test files
 └── App.tsx             # Main app component
@@ -79,45 +79,13 @@ src/
 
 ## API Integration
 
-The app currently uses a mock API (`src/services/mockApi.ts`) that simulates real backend functionality. To switch to a live API:
+The frontend communicates with a FastAPI backend (default `http://localhost:8000`).
 
-### Current Mock Endpoints
-- `POST /api/analyze` - Analyze resume vs job description
-- `GET /api/history` - Get analysis history
-- `GET /api/history/:id` - Get specific analysis
-- `DELETE /api/history/:id` - Delete analysis
-
-### Switching to Live API
-
-1. **Create a new API service file**:
-   ```typescript
-   // src/services/liveApi.ts
-   const API_BASE = process.env.VITE_API_URL || 'https://your-api.com';
-   
-   export const liveApi = {
-     async analyze(data) {
-       const response = await fetch(`${API_BASE}/api/analyze`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(data)
-       });
-       return response.json();
-     },
-     // ... other methods
-   };
-   ```
-
-2. **Update imports in components**:
-   ```typescript
-   // Replace mockApi imports
-   import { liveApi as api } from '../services/liveApi';
-   ```
-
-3. **Set environment variables**:
-   ```bash
-   # .env.local
-   VITE_API_URL=https://your-backend-api.com
-   ```
+### Available Endpoints
+- `POST /analyze` - Analyze resume vs job description
+- `GET /history` - Get analysis history
+- `GET /history/{id}` - Get specific analysis
+- `DELETE /history/{id}` - Delete analysis
 
 ## Testing
 
@@ -190,4 +158,4 @@ For questions or issues:
 
 ---
 
-**Note**: This is a frontend-only implementation with mock data. For production use, you'll need to implement a backend API that matches the expected interface defined in `src/services/mockApi.ts`.
+**Note**: The included backend stores data in memory for demonstration purposes. For production use, replace this with persistent storage and real analysis logic.

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Trash2, Eye, FileText, Loader, AlertCircle } from 'lucide-react';
-import { mockApi } from '../services/mockApi';
+import { api } from '../services/api';
 import { useToast } from '../components/Toast';
 
 interface HistoryItem {
@@ -35,7 +35,7 @@ export function History() {
 
   const loadHistory = async () => {
     try {
-      const response = await mockApi.getHistory();
+      const response = await api.getHistory();
       setItems(response.items);
     } catch (error) {
       showToast('error', 'Failed to load history');
@@ -47,7 +47,7 @@ export function History() {
   const loadDetail = async (id: string) => {
     setDetailLoading(true);
     try {
-      const detail = await mockApi.getHistoryItem(id);
+      const detail = await api.getHistoryItem(id);
       setSelectedItem(detail);
     } catch (error) {
       showToast('error', 'Failed to load analysis details');
@@ -62,7 +62,7 @@ export function History() {
     if (!confirm('Are you sure you want to delete this analysis?')) return;
     
     try {
-      await mockApi.deleteHistoryItem(id);
+      await api.deleteHistoryItem(id);
       setItems(prev => prev.filter(item => item.id !== id));
       if (selectedItem?.id === id) {
         setSelectedItem(null);
