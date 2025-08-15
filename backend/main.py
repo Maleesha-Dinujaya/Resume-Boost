@@ -1,12 +1,12 @@
 from __future__ import annotations
-
+from typing import Optional, List, Dict, Tuple 
 from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 import asyncio
 
-from .analyzer import timed_analysis
+from analyzer import timed_analysis
 
 app = FastAPI()
 
@@ -14,7 +14,7 @@ class AnalysisRequest(BaseModel):
     resume_text: str
     job_description: str
     role: Optional[str] = None
-    emphasis: Optional[list[str]] = None
+    emphasis: Optional[List[str]] = None
 
 # In-memory storage for analyses
 analyses: list[dict] = []
