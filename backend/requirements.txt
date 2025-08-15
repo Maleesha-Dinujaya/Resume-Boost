@@ -1,0 +1,30 @@
+# Core Backend
+fastapi==0.109.1
+uvicorn==0.27.0
+python-multipart==0.0.6  # For file uploads
+python-jose==3.3.0  # JWT authentication (optional)
+passlib==1.7.4  # Password hashing (optional)
+
+# AI/ML & NLP
+spacy==3.7.4
+nltk==3.8.1
+scikit-learn  # For advanced scoring
+pandas  # Data processing (optional)
+
+# Database
+sqlalchemy==2.0.25
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+alembic==1.13.1  # Database migrations (optional)
+
+# Testing
+pytest==7.4.4
+httpx==0.26.0  # Async HTTP client for tests
+pytest-cov==4.1.0  # Test coverage
+
+# DevOps
+docker==7.0.0  # Containerization
+gunicorn==21.2.0  # Production server (optional)
+
+# Utilities
+python-dotenv==1.0.0  # Environment variables
+loguru==0.7.2  # Logging (optional)
