@@ -86,7 +86,6 @@ export function TailorWorkspace() {
       const response = await api.analyze({
         resumeText: resumeText.trim(),
         jobDescription: jobDescription.trim(),
-        role: targetRole.trim() || undefined,
         emphasis: emphasis.length > 0 ? emphasis : undefined
       });
       
