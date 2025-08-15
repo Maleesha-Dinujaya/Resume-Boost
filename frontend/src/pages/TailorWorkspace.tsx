@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Loader, RefreshCw, Copy, Download, Star, AlertTriangle } from 'lucide-react';
-import { mockApi } from '../services/mockApi';
+import { api } from '../services/api';
 import { storage } from '../services/storage';
 import { useToast } from '../components/Toast';
 
@@ -83,11 +83,10 @@ export function TailorWorkspace() {
     setIsAnalyzing(true);
     
     try {
-      const response = await mockApi.analyze({
+      const response = await api.analyze({
         resumeText: resumeText.trim(),
         jobDescription: jobDescription.trim(),
         role: targetRole.trim() || undefined,
-        seniority: seniority || undefined,
         emphasis: emphasis.length > 0 ? emphasis : undefined
       });
       

@@ -5,8 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 import App from '../App';
 
 // Mock the API
-jest.mock('../services/mockApi', () => ({
-  mockApi: {
+jest.mock('../services/api', () => ({
+  api: {
     analyze: jest.fn().mockResolvedValue({
       id: '1',
       score: 85,

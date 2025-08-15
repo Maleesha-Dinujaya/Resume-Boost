@@ -14,8 +14,8 @@ jest.mock('../components/Toast', () => ({
 }));
 
 // Mock the API
-jest.mock('../services/mockApi', () => ({
-  mockApi: {
+jest.mock('../services/api', () => ({
+  api: {
     analyze: jest.fn().mockResolvedValue({
       id: '1',
       score: 85,
@@ -80,7 +80,7 @@ describe('TailorWorkspace', () => {
   });
 
   test('successfully analyzes resume and shows results', async () => {
-    const { mockApi } = require('../services/mockApi');
+    const { api } = require('../services/api');
     renderWithProviders(<TailorWorkspace />);
     
     const resumeTextarea = screen.getByPlaceholderText('Paste your resume content here...');
@@ -92,11 +92,10 @@ describe('TailorWorkspace', () => {
     fireEvent.click(analyzeButton);
     
     await waitFor(() => {
-      expect(mockApi.analyze).toHaveBeenCalledWith({
+      expect(api.analyze).toHaveBeenCalledWith({
         resumeText: 'Software engineer with React experience',
         jobDescription: 'Looking for React developer',
         role: undefined,
-        seniority: undefined,
         emphasis: undefined
       });
     });

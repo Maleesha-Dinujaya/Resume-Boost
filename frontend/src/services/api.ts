@@ -1,0 +1,77 @@
+export interface AnalyzeRequest {
+  resumeText: string;
+  jobDescription: string;
+  role?: string;
+  emphasis?: string[];
+}
+
+export interface AnalyzeResponse {
+  id: string;
+  createdAt: string;
+  score: number;
+  matchedSkills: string[];
+  improvementAreas: string[];
+  highlights: string[];
+  resumePreview?: string;
+  jobTitle?: string;
+}
+
+export interface HistoryItem {
+  id: string;
+  createdAt: string;
+  role: string;
+  score: number;
+}
+
+const API_BASE_URL = 'http://localhost:8000';
+
+export const api = {
+  async analyze(request: AnalyzeRequest): Promise<AnalyzeResponse> {
+    const response = await fetch(`${API_BASE_URL}/analyze`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        resume_text: request.resumeText,
+        job_description: request.jobDescription,
+        role: request.role,
+        emphasis: request.emphasis,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to analyze resume');
+    }
+
+    return response.json();
+  },
+
+  async getHistory(): Promise<{ items: HistoryItem[] }> {
+    const response = await fetch(`${API_BASE_URL}/history`);
+    if (!response.ok) {
+      throw new Error('Failed to load history');
+    }
+    return response.json();
+  },
+
+  async getHistoryItem(id: string): Promise<AnalyzeResponse | null> {
+    const response = await fetch(`${API_BASE_URL}/history/${id}`);
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error('Failed to load analysis');
+    }
+    return response.json();
+  },
+
+  async deleteHistoryItem(id: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/history/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete analysis');
+    }
+  },
+};
