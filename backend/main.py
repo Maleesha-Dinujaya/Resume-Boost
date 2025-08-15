@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 from fastapi import FastAPI, HTTPException
 from typing import Optional
+from pydantic import BaseModel
 from datetime import datetime
-import spacy
+import asyncio
+
+from .analyzer import timed_analysis
 
 app = FastAPI()
 
-# Load NLP model (for resume parsing)
-nlp = spacy.load("en_core_web_sm")
+class AnalysisRequest(BaseModel):
+    resume_text: str
+    job_description: str
+    role: Optional[str] = None
+    emphasis: Optional[list[str]] = None
 
 # In-memory storage for analyses
 analyses: list[dict] = []
@@ -14,23 +22,21 @@ next_id = 1
 
 
 @app.post("/analyze")
-async def analyze_resume(
-    resume_text: str,
-    job_description: str,
-    role: Optional[str] = None,
-    emphasis: Optional[list[str]] = None,
-):
+async def analyze_resume(req: AnalysisRequest):
+    resume_text = req.resume_text
+    job_description = req.job_description
+    role = req.role
+    emphasis = req.emphasis
     """Analyze resume against job description using NLP."""
     global next_id
 
-    # Process text with spaCy
-    doc = nlp(resume_text)
+    if not resume_text.strip() or not job_description.strip():
+        raise HTTPException(status_code=400, detail="Resume text and job description are required")
 
-    # Extract skills (simple example)
-    skills = [ent.text for ent in doc.ents if ent.label_ == "SKILL"]
-
-    # Calculate match score (placeholder logic)
-    match_score = 75  # Replace with real AI logic later
+    try:
+        result = await timed_analysis(resume_text, job_description, timeout=2.0)
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=503, detail="Analysis timed out")
 
     analysis_id = str(next_id)
     next_id += 1
@@ -40,10 +46,7 @@ async def analyze_resume(
         "id": analysis_id,
         "createdAt": created_at,
         "jobTitle": role or "Target Position",
-        "score": match_score,
-        "matchedSkills": skills,
-        "improvementAreas": ["Add more metrics", "Highlight leadership"],
-        "highlights": ["Built React apps", "Led team projects"],
+        **result,
         "resumePreview": (resume_text[:100] + "...") if len(resume_text) > 100 else resume_text,
     }
 
