@@ -75,12 +75,12 @@ describe('Integration Tests', () => {
       expect(screen.getByText('How ResumeBoost Works')).toBeInTheDocument();
     });
     
-    // Navigate to History
+    // Navigate to History (should redirect to login)
     const historyLink = screen.getByText('History');
     await user.click(historyLink);
-    
+
     await waitFor(() => {
-      expect(screen.getByText('Analysis History')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
     });
     
     // Navigate back to landing
