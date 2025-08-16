@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Zap, Menu, X } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ export function Layout({ children }: LayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const { token, userEmail, logout } = useAuth();
 
   const navigation = [
     { name: 'Tailor Resume', href: '/tailor' },
@@ -43,7 +45,25 @@ export function Layout({ children }: LayoutProps) {
                   {item.name}
                 </Link>
               ))}
-              
+              {token ? (
+                <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
+                  <span>Signed in as {userEmail}</span>
+                  <button
+                    onClick={logout}
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                >
+                  Login
+                </Link>
+              )}
+
               <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
@@ -102,6 +122,25 @@ export function Layout({ children }: LayoutProps) {
                   {item.name}
                 </Link>
               ))}
+              {token ? (
+                <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">Signed in as {userEmail}</p>
+                  <button
+                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                    className="block w-full text-left py-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
+                >
+                  Login
+                </Link>
+              )}
             </div>
           )}
         </div>

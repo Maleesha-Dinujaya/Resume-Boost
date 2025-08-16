@@ -1,3 +1,5 @@
+import { storage } from './storage';
+
 export interface AnalyzeRequest {
   resumeText: string;
   jobDescription?: string;
@@ -12,10 +14,15 @@ export interface AnalyzeResponse {
   highlights: string[];
 }
 
-// Token plumbing — NEW
-let authToken: string | null = null;
+// Token plumbing
+let authToken: string | null = storage.getAuthToken();
 export function setAuthToken(token: string | null) {
   authToken = token;
+  if (token) {
+    storage.setAuthToken(token, storage.getAuthEmail() ?? undefined);
+  } else {
+    storage.clearAuthToken();
+  }
 }
 
 function authHeaders(extra?: Record<string, string>) {
@@ -37,9 +44,44 @@ export interface HistoryDetail extends AnalyzeResponse {
   jobTitle?: string;
 }
 
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+}
+
 const API_BASE_URL = 'http://localhost:8000';
 
 export const api = {
+  async login(email: string, password: string): Promise<AuthResponse> {
+    const body = new URLSearchParams();
+    body.set('username', email);
+    body.set('password', password);
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+    const data: AuthResponse = await response.json();
+    setAuthToken(data.access_token);
+    return data;
+  },
+
+  async register(email: string, password: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!response.ok) {
+      throw new Error('Registration failed');
+    }
+    const data: AuthResponse = await response.json();
+    setAuthToken(data.access_token);
+    return data;
+  },
   async analyze(request: AnalyzeRequest): Promise<AnalyzeResponse> {
     const response = await fetch(`${API_BASE_URL}/analyze`, {
       method: 'POST',
