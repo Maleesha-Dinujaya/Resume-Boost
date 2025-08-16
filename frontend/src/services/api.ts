@@ -4,6 +4,8 @@ export interface AnalyzeRequest {
   resumeText: string;
   jobDescription?: string;
   emphasis?: string[];
+  role?: string;
+  seniority?: string;
 }
 
 export interface AnalyzeResponse {
@@ -12,6 +14,9 @@ export interface AnalyzeResponse {
   matchedSkills: string[];
   improvementAreas: string[];
   highlights: string[];
+  breakdown?: { skill_match: number; semantic_similarity: number; ats_optimization: number };
+  weakRequirements?: string[];
+  evidence?: { jd: string; resume: string; similarity: number }[];
 }
 
 // Token plumbing
@@ -90,6 +95,8 @@ export const api = {
         resume_text: request.resumeText,
         job_description: request.jobDescription,
         emphasis: request.emphasis,
+        role: request.role,
+        seniority: request.seniority,
       }),
     });
 

@@ -10,6 +10,7 @@ spacy==3.7.4
 nltk==3.8.1
 scikit-learn  # For advanced scoring
 pandas  # Data processing (optional)
+sentence-transformers>=2.7.0
 
 # Database
 sqlalchemy==2.0.25

@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import re
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import asyncio
 
+import numpy as np
 import spacy
+try:  # pragma: no cover - optional dependency in tests
+    from sentence_transformers import SentenceTransformer
+except Exception:  # pragma: no cover
+    SentenceTransformer = None  # type: ignore
+from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy.language import Language
 # Add skill synonyms mapping
 SKILL_SYNONYMS = {
@@ -23,6 +30,18 @@ SKILL_SYNONYMS = {
     "team leadership": "Leadership",
     "led team": "Leadership",
 }
+
+ROLE_PRIORITY = {
+    "data scientist": ["python", "pandas", "numpy", "sql", "statistics", "machine learning"],
+    "frontend developer": ["javascript", "react", "typescript", "css", "html"],
+    "backend developer": ["python", "node.js", "sql", "aws", "docker"],
+}
+
+SENIORITY_PRIORITY = {
+    "junior": ["learning", "collaboration"],
+    "senior": ["leadership", "architecture", "mentoring"],
+}
+
 
 from spacy.pipeline import EntityRuler
 
@@ -81,6 +100,56 @@ def semantic_similarity(a: str, b: str) -> float:
     if nlp.vocab.vectors.n_keys == 0:
         return 0.0
     return float(doc_a.similarity(doc_b))
+
+
+@lru_cache(maxsize=1)
+def get_embedder() -> SentenceTransformer:
+    """Load and cache the sentence transformer model."""
+    if SentenceTransformer is None:  # pragma: no cover
+        raise ImportError("sentence-transformers not installed")
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+
+def split_sents(text: str) -> List[str]:
+    """Split text into sentences or bullet points with a cap of 200."""
+    chunks = re.split(r"[\n\r•\-]+", text)
+    sents: List[str] = []
+    for chunk in chunks:
+        parts = re.split(r"(?<=[.!?]) +", chunk)
+        for p in parts:
+            p = p.strip()
+            if p:
+                sents.append(p)
+            if len(sents) >= 200:
+                return sents[:200]
+    return sents[:200]
+
+
+def embedding_match(resume_text: str, jd_text: str) -> Dict:
+    """Return semantic matching stats using sentence embeddings."""
+    resume = split_sents(resume_text)
+    jd = split_sents(jd_text)
+    if not resume or not jd:
+        return {"semantic": 0.0, "weak_requirements": jd, "support": []}
+
+    model = get_embedder()
+    R = model.encode(resume, normalize_embeddings=True)
+    J = model.encode(jd, normalize_embeddings=True)
+
+    sims = np.clip(R @ J.T, -1, 1)
+    best_idx = sims.argmax(axis=0)
+    top_per_jd = sims[best_idx, np.arange(len(jd))]
+
+    weak = [jd[i] for i, v in enumerate(top_per_jd) if v < 0.45]
+    support = [
+        (jd[i], resume[best_idx[i]], float(top_per_jd[i]))
+        for i in range(len(jd))
+    ]
+    return {
+        "semantic": float(top_per_jd.mean()) if len(top_per_jd) else 0.0,
+        "weak_requirements": weak,
+        "support": support,
+    }
 
 
 def prioritize_missing(job_skills: List[str], resume_skills: List[str], job_text: str) -> Dict[str, List[str]]:
@@ -152,21 +221,59 @@ def calculate_scores(
     resume_skills: List[str],
     resume_text: str,
     job_text: str,
-) -> Tuple[float, Dict[str, float], List[str], Dict[str, List[str]], List[str]]:
-    """Compute overall score, breakdown, matched and missing skills, suggestions."""
-    # Skill match coverage
-    matched = []
-    unmatched_job = []
-    for js in job_skills:
-        if js in resume_skills:
-            matched.append(js)
-        else:
-            unmatched_job.append(js)
+    role: Optional[str] = None,
+    seniority: Optional[str] = None,
+) -> Tuple[
+    float,
+    Dict[str, float],
+    List[str],
+    Dict[str, List[str]],
+    List[str],
+    List[str],
+    List[Tuple[str, str, float]],
+]:
+    """Compute overall score, breakdown, matched/missing skills and suggestions."""
 
-    coverage = (len(matched) / len(job_skills) * 50) if job_skills else 0.0
+    jd_sents = split_sents(job_text)
+    vectorizer = TfidfVectorizer().fit(jd_sents or [job_text])
+    tfidf_matrix = vectorizer.transform(jd_sents or [job_text])
 
-    # Semantic relevance
-    sem = semantic_similarity(resume_text, job_text) * 30
+    priority = set()
+    if role:
+        priority.update(ROLE_PRIORITY.get(role.lower(), []))
+    if seniority:
+        priority.update(SENIORITY_PRIORITY.get(seniority.lower(), []))
+
+    # Skill weights via TF-IDF
+    skill_weights: Dict[str, float] = {}
+    for skill in job_skills:
+        tokens = [t.lower() for t in skill.split()]
+        weight = 0.0
+        for t in tokens:
+            idx = vectorizer.vocabulary_.get(t)
+            if idx is not None:
+                weight = max(weight, float(tfidf_matrix[:, idx].max()))
+        if weight == 0.0:
+            weight = 0.1
+        if skill.lower() in priority:
+            weight *= 1.3
+        skill_weights[skill] = weight
+
+    total_skill_weight = sum(skill_weights.values()) or 1.0
+    matched = [s for s in job_skills if s in resume_skills]
+    coverage = sum(skill_weights[s] for s in matched) / total_skill_weight * 50
+
+    # Embedding-based semantic matching
+    embed = embedding_match(resume_text, job_text)
+    similarities = np.array([sim for _, _, sim in embed["support"]])
+    sentence_weights = np.array(tfidf_matrix.sum(axis=1)).flatten() if jd_sents else np.array([1.0])
+    for i, jd_sentence in enumerate(jd_sents):
+        if any(p in jd_sentence.lower() for p in priority):
+            sentence_weights[i] *= 1.3
+    if sentence_weights.sum() == 0:
+        sentence_weights += 1.0
+    weighted_sem = float((similarities * sentence_weights).sum() / sentence_weights.sum()) if len(similarities) else 0.0
+    semantic_score = weighted_sem * 30
 
     # ATS analysis
     ats_score, ats_suggestions = ats_analysis(resume_text, job_skills)
@@ -174,10 +281,10 @@ def calculate_scores(
     # Missing skills priority
     missing = prioritize_missing(job_skills, resume_skills, job_text)
 
-    total = coverage + sem + ats_score
+    total = coverage + semantic_score + ats_score
     breakdown = {
         "skill_match": round(coverage, 2),
-        "semantic_similarity": round(sem, 2),
+        "semantic_similarity": round(semantic_score, 2),
         "ats_optimization": round(ats_score, 2),
     }
 
@@ -186,33 +293,72 @@ def calculate_scores(
         for skill in missing[level]:
             suggestions.append(f"Include '{skill}' in your resume")
     suggestions.extend(ats_suggestions)
-    # Ensure at least three suggestions
     while len(suggestions) < 3:
         suggestions.append("Add quantifiable achievements to your experience")
 
-    return round(total, 2), breakdown, matched, missing, suggestions
+    return (
+        round(total, 2),
+        breakdown,
+        matched,
+        missing,
+        suggestions,
+        embed["weak_requirements"],
+        embed["support"],
+    )
 
 
 # ---------------------------------------------------------------------------
 # Public analysis API
 # ---------------------------------------------------------------------------
 
-async def perform_analysis(resume_text: str, job_description: str) -> Dict:
+async def perform_analysis(
+    resume_text: str,
+    job_description: str,
+    role: Optional[str] = None,
+    seniority: Optional[str] = None,
+) -> Dict:
     nlp = get_nlp()  # ensure model loaded
     job_skills = extract_skills(job_description)
     resume_skills = extract_skills(resume_text)
-    score, breakdown, matched, missing, suggestions = calculate_scores(
-        job_skills, resume_skills, resume_text, job_description
+    (
+        score,
+        breakdown,
+        matched,
+        missing,
+        suggestions,
+        weak_requirements,
+        support,
+    ) = calculate_scores(
+        job_skills,
+        resume_skills,
+        resume_text,
+        job_description,
+        role,
+        seniority,
     )
+    evidence = [
+        {"jd": jd, "resume": r, "similarity": sim} for jd, r, sim in support
+    ]
     return {
         "score": score,
         "breakdown": breakdown,
         "matched_skills": matched,
         "missing_skills": missing,
         "suggestions": suggestions,
+        "weak_requirements": weak_requirements,
+        "evidence": evidence,
     }
 
 
-async def timed_analysis(resume_text: str, job_description: str, timeout: float = 5.0) -> Dict:
+async def timed_analysis(
+    resume_text: str,
+    job_description: str,
+    role: Optional[str] = None,
+    seniority: Optional[str] = None,
+    timeout: float = 5.0,
+) -> Dict:
     """Run analysis with a timeout."""
-    return await asyncio.wait_for(perform_analysis(resume_text, job_description), timeout=timeout)
+    return await asyncio.wait_for(
+        perform_analysis(resume_text, job_description, role, seniority),
+        timeout=timeout,
+    )
