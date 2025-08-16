@@ -1,32 +1,19 @@
 from __future__ import annotations
-<<<<<<< HEAD
-from typing import Optional, List, Dict, Tuple 
-from fastapi import FastAPI, HTTPException
-from typing import Optional
-=======
 from typing import Optional, List
 from fastapi import FastAPI, HTTPException, Depends, status
->>>>>>> 7e6654a36c4bda202908f5018c8a3e7c118dd520
-from pydantic import BaseModel
-from datetime import datetime
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.orm import Session
 import asyncio
 
-<<<<<<< HEAD
-from analyzer import timed_analysis
-=======
 from .analyzer import timed_analysis
-from .database import Base, engine
+from .database import Base, engine, SessionLocal
 from .models import User, Analysis
-from sqlalchemy.orm import Session
-
 from .auth import (
     get_db, hash_password, verify_password,
     create_access_token, get_current_user
 )
-
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
->>>>>>> 7e6654a36c4bda202908f5018c8a3e7c118dd520
 
 app = FastAPI()
 app.add_middleware(
@@ -35,8 +22,8 @@ app.add_middleware(
     allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
 )
 
-# Create tables (dev)
 Base.metadata.create_all(bind=engine)
+
 
 # ---------- Schemas ----------
 class AnalysisRequest(BaseModel):
