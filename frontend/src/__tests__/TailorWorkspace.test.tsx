@@ -21,7 +21,12 @@ jest.mock('../services/api', () => ({
       score: 85,
       matchedSkills: ['React', 'TypeScript', 'Node.js'],
       improvementAreas: ['Add more metrics', 'Include certifications'],
-      highlights: ['Built 3 React apps', 'Led team of 5 developers']
+      highlights: ['Built 3 React apps', 'Led team of 5 developers'],
+      breakdown: { skill_match: 40, semantic_similarity: 25, ats_optimization: 15 },
+      weakRequirements: ['GraphQL experience'],
+      evidence: [
+        { jd: 'Experience with React', resume: 'Worked with React', similarity: 0.9 }
+      ],
     })
   }
 }));
@@ -95,15 +100,21 @@ describe('TailorWorkspace', () => {
       expect(api.analyze).toHaveBeenCalledWith({
         resumeText: 'Software engineer with React experience',
         jobDescription: 'Looking for React developer',
-        emphasis: undefined
+        emphasis: undefined,
+        role: undefined,
+        seniority: undefined,
       });
     });
-    
+
     await waitFor(() => {
       expect(screen.getByText('85%')).toBeInTheDocument();
       expect(screen.getByText('React')).toBeInTheDocument();
       expect(screen.getByText('TypeScript')).toBeInTheDocument();
       expect(screen.getByText('Node.js')).toBeInTheDocument();
+      expect(screen.getByText('Detailed Analysis')).toBeInTheDocument();
+      expect(screen.getByText('Weak Requirements')).toBeInTheDocument();
+      expect(screen.getByText('GraphQL experience')).toBeInTheDocument();
+      expect(screen.getByText('Experience with React')).toBeInTheDocument();
     });
   });
 

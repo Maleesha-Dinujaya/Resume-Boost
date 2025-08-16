@@ -30,6 +30,7 @@ class AnalysisRequest(BaseModel):
     resume_text: str
     job_description: str
     role: Optional[str] = None
+    seniority: Optional[str] = None
     emphasis: Optional[List[str]] = None
 
 class RegisterRequest(BaseModel):
@@ -70,7 +71,13 @@ async def analyze_resume(req: AnalysisRequest, db: Session = Depends(get_db), me
         raise HTTPException(status_code=400, detail="Resume text and job description are required")
 
     try:
-        result = await timed_analysis(req.resume_text, req.job_description, timeout=2.0)
+        result = await timed_analysis(
+            req.resume_text,
+            req.job_description,
+            req.role,
+            req.seniority,
+            timeout=2.0,
+        )
     except asyncio.TimeoutError:
         raise HTTPException(status_code=503, detail="Analysis timed out")
 
@@ -94,6 +101,9 @@ async def analyze_resume(req: AnalysisRequest, db: Session = Depends(get_db), me
         "improvementAreas": analysis.improvement_areas,
         "highlights": analysis.highlights,
         "resumePreview": analysis.resume_preview,
+        "breakdown": result.get("breakdown"),
+        "weakRequirements": result.get("weak_requirements"),
+        "evidence": result.get("evidence"),
     }
 
 @app.get("/history")

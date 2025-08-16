@@ -10,6 +10,9 @@ interface AnalysisResult {
   matchedSkills: string[];
   improvementAreas: string[];
   highlights: string[];
+  breakdown?: { skill_match: number; semantic_similarity: number; ats_optimization: number };
+  weakRequirements?: string[];
+  evidence?: { jd: string; resume: string; similarity: number }[];
 }
 
 export function TailorWorkspace() {
@@ -86,7 +89,9 @@ export function TailorWorkspace() {
       const response = await api.analyze({
         resumeText: resumeText.trim(),
         jobDescription: jobDescription.trim(),
-        emphasis: emphasis.length > 0 ? emphasis : undefined
+        emphasis: emphasis.length > 0 ? emphasis : undefined,
+        role: targetRole.trim() || undefined,
+        seniority: seniority.trim() || undefined,
       });
       
       setResult(response);
@@ -115,6 +120,11 @@ export function TailorWorkspace() {
       navigator.clipboard.writeText(text);
       showToast('success', 'Highlights copied to clipboard');
     }
+  };
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    showToast('success', 'Copied to clipboard');
   };
 
   const downloadResults = () => {
@@ -406,6 +416,77 @@ export function TailorWorkspace() {
                   </p>
                 </div>
               </div>
+
+              {/* Detailed Analysis */}
+              {result.breakdown && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Detailed Analysis
+                  </h3>
+                  <div className="space-y-4">
+                    {(['skill_match', 'semantic_similarity', 'ats_optimization'] as const).map(key => (
+                      <div key={key}>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="capitalize">{key.replace('_', ' ')}</span>
+                          <span>{result.breakdown![key]}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded">
+                          <div
+                            className="h-2 bg-blue-500 rounded"
+                            style={{ width: `${result.breakdown![key]}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {result.weakRequirements && result.weakRequirements.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="font-medium mb-2">Weak Requirements</h4>
+                      <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300">
+                        {result.weakRequirements.map((w, i) => (
+                          <li key={i}>{w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {result.evidence && result.evidence.length > 0 && (
+                    <div className="mt-6 overflow-x-auto">
+                      <h4 className="font-medium mb-2">Evidence</h4>
+                      <table className="min-w-full text-sm">
+                        <thead>
+                          <tr className="text-left">
+                            <th className="pr-4">JD Requirement</th>
+                            <th className="pr-4">Resume Evidence</th>
+                            <th>Similarity</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {result.evidence.map((ev, i) => (
+                            <tr key={i} className="align-top">
+                              <td className="pr-4 pb-2">{ev.jd}</td>
+                              <td className="pr-4 pb-2">
+                                <div className="flex items-start gap-2">
+                                  <span>{ev.resume}</span>
+                                  <button
+                                    onClick={() => copyText(ev.resume)}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    aria-label="Copy resume sentence"
+                                  >
+                                    <Copy className="h-4 w-4" />
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="pb-2">{Math.round(ev.similarity * 100)}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Matched Skills */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
