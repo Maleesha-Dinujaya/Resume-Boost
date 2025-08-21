@@ -8,9 +8,16 @@ import asyncio
 import numpy as np
 import spacy
 try:  # pragma: no cover - optional dependency in tests
-    from sentence_transformers import SentenceTransformer
+    # Sentence-BERT models from PWC (https://paperswithcode.com/paper/sentence-bert)
+    from sentence_transformers import SentenceTransformer, CrossEncoder
 except Exception:  # pragma: no cover
     SentenceTransformer = None  # type: ignore
+    CrossEncoder = None  # type: ignore
+try:  # pragma: no cover - keyword extraction via GitHub project FlashText
+    # FlashText repo: https://github.com/vi3k6i5/flashtext
+    from flashtext import KeywordProcessor
+except Exception:  # pragma: no cover
+    KeywordProcessor = None  # type: ignore
 from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy.language import Language
 # Add skill synonyms mapping
@@ -110,6 +117,14 @@ def get_embedder() -> SentenceTransformer:
     return SentenceTransformer("all-MiniLM-L6-v2")
 
 
+@lru_cache(maxsize=1)
+def get_cross_encoder() -> CrossEncoder:
+    """Load and cache cross-encoder model for fine-grained similarity."""
+    if CrossEncoder is None:  # pragma: no cover
+        raise ImportError("sentence-transformers not installed")
+    return CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+
+
 def split_sents(text: str) -> List[str]:
     """Split text into sentences or bullet points with a cap of 200."""
     chunks = re.split(r"[\n\r•\-]+", text)
@@ -152,6 +167,28 @@ def embedding_match(resume_text: str, jd_text: str) -> Dict:
     }
 
 
+def cross_encoder_match(resume_text: str, jd_text: str) -> Dict:
+    """Refine semantic stats using a cross-encoder model."""
+    resume = split_sents(resume_text)
+    jd = split_sents(jd_text)
+    if not resume or not jd:
+        return {"semantic": 0.0, "support": []}
+
+    model = get_cross_encoder()
+    pairs = [[j, r] for j in jd for r in resume]
+    scores = np.array(model.predict(pairs)).reshape(len(jd), len(resume))
+    best_idx = scores.argmax(axis=1)
+    top_scores = scores[np.arange(len(jd)), best_idx]
+    support = [
+        (jd[i], resume[best_idx[i]], float(top_scores[i]))
+        for i in range(len(jd))
+    ]
+    return {
+        "semantic": float(top_scores.mean()) if len(top_scores) else 0.0,
+        "support": support,
+    }
+
+
 def prioritize_missing(job_skills: List[str], resume_skills: List[str], job_text: str) -> Dict[str, List[str]]:
     """Return missing skills prioritized by frequency and first occurrence."""
     missing = [s for s in job_skills if s not in resume_skills]
@@ -180,8 +217,15 @@ def ats_analysis(resume_text: str, job_skills: List[str]) -> Tuple[float, List[s
     # Keyword density (10 points)
     tokens = resume_text.split()
     total_tokens = len(tokens) or 1
-    keyword_hits = sum(text_lower.count(skill.lower()) for skill in job_skills)
-    density = keyword_hits / total_tokens
+    if KeywordProcessor:
+        kp = KeywordProcessor(case_sensitive=False)
+        for skill in job_skills:
+            kp.add_keyword(skill)
+        found = kp.extract_keywords(text_lower)
+        density = len(found) / total_tokens
+    else:
+        keyword_hits = sum(text_lower.count(skill.lower()) for skill in job_skills)
+        density = keyword_hits / total_tokens
     if density > 0.02:
         total_score += 10
     elif density > 0.01:
@@ -273,7 +317,25 @@ def calculate_scores(
     if sentence_weights.sum() == 0:
         sentence_weights += 1.0
     weighted_sem = float((similarities * sentence_weights).sum() / sentence_weights.sum()) if len(similarities) else 0.0
-    semantic_score = weighted_sem * 30
+
+    # Cross-encoder refinement (PWC model). Fallback silently if unavailable.
+    cross_sem = 0.0
+    cross_support: List[Tuple[str, str, float]] = []
+    try:
+        cross = cross_encoder_match(resume_text, job_text)
+        cross_sem = cross["semantic"]
+        cross_support = cross["support"]
+    except Exception:
+        pass
+
+    combined_sem = weighted_sem
+    support = embed["support"]
+    if cross_sem:
+        combined_sem = (weighted_sem + cross_sem) / 2
+        if cross_support:
+            support = cross_support
+
+    semantic_score = combined_sem * 30
 
     # ATS analysis
     ats_score, ats_suggestions = ats_analysis(resume_text, job_skills)
@@ -303,7 +365,7 @@ def calculate_scores(
         missing,
         suggestions,
         embed["weak_requirements"],
-        embed["support"],
+        support,
     )
 
 
