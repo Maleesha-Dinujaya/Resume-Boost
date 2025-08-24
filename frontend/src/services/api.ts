@@ -54,7 +54,8 @@ export interface AuthResponse {
   token_type: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
+// Deployed backend base URL
+const API_BASE_URL = 'https://your-api.vercel.app';
 
 export const api = {
   async login(email: string, password: string): Promise<AuthResponse> {
