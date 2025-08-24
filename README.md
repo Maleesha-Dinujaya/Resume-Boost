@@ -17,10 +17,9 @@
 +
  To run the backend analysis locally:
  
- ```bash
- cd backend
- pip install -r requirements.txt
- uvicorn main:app --reload
- ```
+```bash
+pip install -r requirements.txt
+uvicorn api.main:app --reload
+```
  
  The frontend can be started from the `frontend` directory with `npm install` and `npm run dev`.
