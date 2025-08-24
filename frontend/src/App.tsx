@@ -23,7 +23,7 @@ function AppContent() {
       <Layout>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/tailor" element={<TailorWorkspace />} />
+          <Route path="/tailor" element={<RequireAuth><TailorWorkspace /></RequireAuth>} />
           <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/privacy" element={<Privacy />} />
