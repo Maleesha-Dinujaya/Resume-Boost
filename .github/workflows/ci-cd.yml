@@ -23,12 +23,11 @@ jobs:
 
       - name: Install backend dependencies
         run: |
-          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Verify backend setup
-        run: PYTHONPATH=$GITHUB_WORKSPACE python -c "from backend.main import app; print('Backend imports successful')"
+        run: PYTHONPATH=$GITHUB_WORKSPACE python -c "from api.main import app; print('Backend imports successful')"
 
   # Frontend Build & Test
   frontend:
