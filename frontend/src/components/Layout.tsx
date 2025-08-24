@@ -155,7 +155,16 @@ export function Layout({ children }: LayoutProps) {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
               <Zap className="h-4 w-4" />
-              <span className="text-sm">© 2024 ResumeBoost. All rights reserved.</span>
+              <span className="text-sm">© 2025 ResumeBoost. All rights reserved. 
+                <br />  Developed by - 
+                <a
+                href="https://github.com/Maleesha-Dinujaya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+              >
+                Maleesha Dinujaya
+              </a></span>
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link
@@ -170,14 +179,6 @@ export function Layout({ children }: LayoutProps) {
               >
                 How It Works
               </Link>
-              <a
-                href="https://github.com/Maleesha-Dinujaya"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
-              >
-                Maleesha Dinujaya
-              </a>
             </div>
           </div>
         </div>

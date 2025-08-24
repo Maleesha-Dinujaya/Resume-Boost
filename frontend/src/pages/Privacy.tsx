@@ -144,7 +144,7 @@ export function Privacy() {
               If you have questions about this Privacy Policy or how we handle your data, 
               please contact us at{' '}
               <a 
-                href="mailto:privacy@resumeboost.com" 
+                href="mailto:maleeshachandrasekara2@gmail.com" 
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 privacy@resumeboost.com
@@ -154,7 +154,7 @@ export function Privacy() {
 
           <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Last updated: January 2024. We may update this Privacy Policy from time to time. 
+              Last updated: August 2025. We may update this Privacy Policy from time to time. 
               We will notify users of any material changes via email or through our service.
             </p>
           </section>
