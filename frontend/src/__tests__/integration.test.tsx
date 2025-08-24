@@ -14,7 +14,8 @@ vi.mock('../services/api', () => ({
       improvementAreas: ['Add more metrics'],
       highlights: ['Built React applications']
     }),
-    getHistory: vi.fn().mockResolvedValue({ items: [] })
+    getHistory: vi.fn().mockResolvedValue({ items: [] }),
+    verifyToken: vi.fn().mockResolvedValue({ email: 'test@example.com' })
   },
   setAuthToken: vi.fn(),
 }));
@@ -69,7 +70,7 @@ describe('Integration Tests', () => {
     render(<App />);
     
     // Navigate to How It Works
-    const howItWorksLink = screen.getByRole('link', { name: /how it works/i });
+    const howItWorksLink = screen.getAllByRole('link', { name: /how it works/i })[0];
     await user.click(howItWorksLink);
     
     await waitFor(() => {
@@ -98,7 +99,7 @@ describe('Integration Tests', () => {
     render(<App />);
     
     // Find and click theme toggle button
-    const themeToggle = screen.getByRole('button', { name: /toggle theme/i });
+    const themeToggle = screen.getAllByRole('button', { name: /toggle theme/i })[0];
     await user.click(themeToggle);
     
     // Check if dark class is applied to document

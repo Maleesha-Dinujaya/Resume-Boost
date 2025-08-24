@@ -73,6 +73,10 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
 
+@app.get("/auth/verify")
+def verify_token(me: User = Depends(get_current_user)):
+    return {"email": me.email}
+
 # ---------- Business endpoints (protected) ----------
 @app.post("/analyze")
 async def analyze_resume(req: AnalysisRequest, db: Session = Depends(get_db), me: User = Depends(get_current_user)):
