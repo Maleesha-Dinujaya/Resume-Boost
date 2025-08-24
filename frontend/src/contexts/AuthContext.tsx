@@ -5,8 +5,8 @@ import { storage } from '../services/storage';
 import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => storage.getAuthToken());
-  const [userEmail, setUserEmail] = useState<string | null>(() => storage.getAuthEmail());
+  const [token, setToken] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,9 +31,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(null);
     setUserEmail(null);
     apiSetAuthToken(null);
+    storage.clear();
     storage.clearAuthToken();
     navigate('/');
   };
+
+  useEffect(() => {
+    const savedToken = storage.getAuthToken();
+    const savedEmail = storage.getAuthEmail();
+    if (savedToken) {
+      apiSetAuthToken(savedToken);
+      api
+        .verifyToken()
+        .then((res) => {
+          setToken(savedToken);
+          setUserEmail(res.email || savedEmail);
+        })
+        .catch(() => {
+          logout();
+        });
+    }
+  }, []);
 
   return (
     <AuthContext.Provider value={{ token, userEmail, login, register, logout }}>

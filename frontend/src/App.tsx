@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -13,6 +13,7 @@ import { Privacy } from './pages/Privacy';
 import { NotFound } from './pages/NotFound';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { storage } from './services/storage';
 
 function AppContent() {
   const { ToastContainer } = useToast();
@@ -37,6 +38,9 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    storage.clear();
+  }, []);
   return (
     <ThemeProvider>
       <Router>

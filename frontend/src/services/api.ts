@@ -88,6 +88,16 @@ export const api = {
     setAuthToken(data.access_token);
     return data;
   },
+
+  async verifyToken(): Promise<{ email: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+      headers: authHeaders(),
+    });
+    if (!response.ok) {
+      throw new Error('Token verification failed');
+    }
+    return response.json();
+  },
   async analyze(request: AnalyzeRequest): Promise<AnalyzeResponse> {
     const response = await fetch(`${API_BASE_URL}/analyze`, {
       method: 'POST',

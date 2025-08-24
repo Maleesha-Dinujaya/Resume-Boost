@@ -11,7 +11,8 @@ vi.mock('../services/api', () => ({
     login: vi.fn(),
     register: vi.fn(),
     analyze: vi.fn(),
-    getHistory: vi.fn().mockResolvedValue({ items: [] })
+    getHistory: vi.fn().mockResolvedValue({ items: [] }),
+    verifyToken: vi.fn().mockResolvedValue({ email: 'test@example.com' }),
   },
   setAuthToken: vi.fn(),
 }));
