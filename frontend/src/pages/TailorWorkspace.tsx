@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Loader, RefreshCw, Copy, Download, Star, AlertTriangle } from 'lucide-react';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
-import { useToast } from '../components/Toast';
+import { useToast } from '../hooks/useToast';
 
 interface AnalysisResult {
   id: string;
@@ -96,7 +96,7 @@ export function TailorWorkspace() {
       
       setResult(response);
       showToast('success', 'Analysis complete! Check your results below.');
-    } catch (error) {
+    } catch {
       showToast('error', 'Failed to analyze resume. Please try again.');
     } finally {
       setIsAnalyzing(false);

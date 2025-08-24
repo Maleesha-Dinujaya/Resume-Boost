@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { RequireAuth } from './components/RequireAuth';
-import { useToast } from './components/Toast';
+import { useToast } from './hooks/useToast';
 import { Landing } from './pages/Landing';
 import { TailorWorkspace } from './pages/TailorWorkspace';
 import { History } from './pages/History';

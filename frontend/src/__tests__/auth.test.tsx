@@ -1,28 +1,29 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import App from '../App';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
 
-jest.mock('../services/api', () => ({
+vi.mock('../services/api', () => ({
   api: {
-    login: jest.fn(),
-    register: jest.fn(),
-    analyze: jest.fn(),
-    getHistory: jest.fn().mockResolvedValue({ items: [] })
+    login: vi.fn(),
+    register: vi.fn(),
+    analyze: vi.fn(),
+    getHistory: vi.fn().mockResolvedValue({ items: [] })
   },
-  setAuthToken: jest.fn()
+  setAuthToken: vi.fn(),
 }));
 
 describe('Authentication flows', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
   test('login page authenticates and redirects', async () => {
-    (api.login as jest.Mock).mockResolvedValue({ access_token: 'token123', token_type: 'bearer' });
+    (api.login as ReturnType<typeof vi.fn>).mockResolvedValue({ access_token: 'token123', token_type: 'bearer' });
     const user = userEvent.setup();
     window.history.pushState({}, '', '/login');
     render(<App />);
@@ -40,7 +41,7 @@ describe('Authentication flows', () => {
   });
 
   test('register page creates account and redirects', async () => {
-    (api.register as jest.Mock).mockResolvedValue({ access_token: 'tok456', token_type: 'bearer' });
+    (api.register as ReturnType<typeof vi.fn>).mockResolvedValue({ access_token: 'tok456', token_type: 'bearer' });
     const user = userEvent.setup();
     window.history.pushState({}, '', '/register');
     render(<App />);
@@ -61,7 +62,7 @@ describe('Authentication flows', () => {
     render(<App />);
     expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();
 
-    (api.login as jest.Mock).mockResolvedValue({ access_token: 'zzz', token_type: 'bearer' });
+    (api.login as ReturnType<typeof vi.fn>).mockResolvedValue({ access_token: 'zzz', token_type: 'bearer' });
     await user.click(screen.getByRole('link', { name: /login/i }));
     await user.type(screen.getByLabelText(/email/i), 'head@example.com');
     await user.type(screen.getByLabelText(/password/i), 'secret');

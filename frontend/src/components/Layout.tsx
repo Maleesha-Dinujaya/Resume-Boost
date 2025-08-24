@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Zap, Menu, X } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../hooks/useTheme';
+import { useAuth } from '../hooks/useAuth';
 
 interface LayoutProps {
   children: React.ReactNode;

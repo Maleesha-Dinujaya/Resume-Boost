@@ -1,26 +1,27 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import App from '../App';
 
 // Mock the API
-jest.mock('../services/api', () => ({
+vi.mock('../services/api', () => ({
   api: {
-    analyze: jest.fn().mockResolvedValue({
+    analyze: vi.fn().mockResolvedValue({
       id: '1',
       score: 85,
       matchedSkills: ['React', 'TypeScript'],
       improvementAreas: ['Add more metrics'],
       highlights: ['Built React applications']
     }),
-    getHistory: jest.fn().mockResolvedValue({ items: [] })
-  }
+    getHistory: vi.fn().mockResolvedValue({ items: [] })
+  },
+  setAuthToken: vi.fn(),
 }));
 
 describe('Integration Tests', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
