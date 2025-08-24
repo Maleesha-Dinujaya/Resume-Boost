@@ -30,30 +30,10 @@ export function TailorWorkspace() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [inputMethod, setInputMethod] = useState<'upload' | 'paste'>('paste');
   
-  // Load saved data on mount
+  // Clear any saved data on mount
   useEffect(() => {
-    const saved = storage.load();
-    if (saved.resumeText) setResumeText(saved.resumeText);
-    if (saved.jobDescription) setJobDescription(saved.jobDescription);
-    if (saved.targetRole) setTargetRole(saved.targetRole);
-    if (saved.seniority) setSeniority(saved.seniority);
-    if (saved.emphasis) setEmphasis(saved.emphasis);
+    storage.clear();
   }, []);
-
-  // Auto-save form data
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      storage.save({
-        resumeText,
-        jobDescription,
-        targetRole,
-        seniority,
-        emphasis
-      });
-    }, 1000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [resumeText, jobDescription, targetRole, seniority, emphasis]);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
