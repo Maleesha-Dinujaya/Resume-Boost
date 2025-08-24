@@ -28,8 +28,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Verify backend setup
-        run: |
-          python -c "from backend.main import app; print('Backend imports successful')"
+        run: PYTHONPATH=$GITHUB_WORKSPACE python -c "from backend.main import app; print('Backend imports successful')"
 
   # Frontend Build & Test
   frontend:
