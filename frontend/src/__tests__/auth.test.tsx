@@ -85,4 +85,16 @@ describe('Authentication flows', () => {
     await waitFor(() => expect(api.register).toHaveBeenCalled());
     expect(await screen.findByText(/email already registered/i)).toBeInTheDocument();
   });
+
+  test('keeps user signed in on refresh even if token verification fails', async () => {
+    storage.setAuthToken('persist-token', 'persist@example.com');
+    (api.verifyToken as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('network error'));
+    window.history.pushState({}, '', '/tailor');
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Resume Tailor Workspace')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/signed in as persist@example.com/i)).toBeInTheDocument();
+  });
 });

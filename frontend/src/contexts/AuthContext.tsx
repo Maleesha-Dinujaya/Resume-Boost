@@ -5,8 +5,9 @@ import { storage } from '../services/storage';
 import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => storage.getAuthToken());
+  const [userEmail, setUserEmail] = useState<string | null>(() => storage.getAuthEmail());
+  const [initializing, setInitializing] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,24 +40,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const savedToken = storage.getAuthToken();
-    const savedEmail = storage.getAuthEmail();
-    if (savedToken) {
-      apiSetAuthToken(savedToken);
+    if (token) {
       api
         .verifyToken()
         .then((res) => {
-          setToken(savedToken);
-          setUserEmail(res.email || savedEmail);
+          setUserEmail(res.email || userEmail);
         })
-        .catch(() => {
-          logout();
-        });
+        .catch((err) => {
+          // If token verification fails (e.g. network issues), keep the user logged in
+          console.warn('Token verification failed:', err);
+        })
+        .finally(() => setInitializing(false));
+    } else {
+      setInitializing(false);
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, userEmail, login, register, logout }}>
+    <AuthContext.Provider value={{ token, userEmail, login, register, logout, initializing }}>
       {children}
     </AuthContext.Provider>
   );
