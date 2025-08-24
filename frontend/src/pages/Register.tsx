@@ -21,7 +21,7 @@ export function Register() {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed';
       setError(message);
-      showToast('error', 'Registration failed');
+       showToast('error', message);
     }
   };
 

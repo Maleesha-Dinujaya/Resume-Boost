@@ -83,7 +83,15 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
     if (!response.ok) {
-      throw new Error('Registration failed');
+      // Try to extract a meaningful error message from the backend
+      let message = 'Registration failed';
+      try {
+        const errorData = await response.json();
+        message = errorData.detail || message;
+      } catch {
+        // ignore json parsing errors
+      }
+      throw new Error(message);
     }
     const data: AuthResponse = await response.json();
     setAuthToken(data.access_token);
