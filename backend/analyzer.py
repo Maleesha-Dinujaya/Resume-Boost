@@ -176,17 +176,20 @@ def cross_encoder_match(resume_text: str, jd_text: str) -> Dict:
 
     model = get_cross_encoder()
     pairs = [[j, r] for j in jd for r in resume]
-    scores = np.array(model.predict(pairs)).reshape(len(jd), len(resume))
+    scores = np.array(model.predict(pairs))
+    scores = 1 / (1 + np.exp(-scores))  # map logits to 0–1
+    scores = 2 * scores - 1  # optional [-1, 1] range for cosine consistency
+    scores = scores.reshape(len(jd), len(resume))
+    scores = np.clip(scores, -1, 1)
+
     best_idx = scores.argmax(axis=1)
     top_scores = scores[np.arange(len(jd)), best_idx]
     support = [
-        (jd[i], resume[best_idx[i]], float(top_scores[i]))
+        (jd[i], resume[best_idx[i]], float(np.clip(top_scores[i], -1, 1)))
         for i in range(len(jd))
     ]
-    return {
-        "semantic": float(top_scores.mean()) if len(top_scores) else 0.0,
-        "support": support,
-    }
+    semantic = float(np.clip(top_scores.mean(), -1, 1)) if len(top_scores) else 0.0
+    return {"semantic": semantic, "support": support}
 
 
 def prioritize_missing(job_skills: List[str], resume_skills: List[str], job_text: str) -> Dict[str, List[str]]:
