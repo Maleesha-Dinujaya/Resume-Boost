@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Trash2, Eye, FileText, Loader, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
-import { useToast } from '../components/Toast';
+import { useToast } from '../hooks/useToast';
 
 interface HistoryItem {
   id: string;
@@ -37,7 +37,7 @@ export function History() {
     try {
       const response = await api.getHistory();
       setItems(response.items);
-    } catch (error) {
+    } catch {
       showToast('error', 'Failed to load history');
     } finally {
       setLoading(false);
@@ -49,7 +49,7 @@ export function History() {
     try {
       const detail = await api.getHistoryItem(id);
       setSelectedItem(detail);
-    } catch (error) {
+    } catch {
       showToast('error', 'Failed to load analysis details');
     } finally {
       setDetailLoading(false);
@@ -68,7 +68,7 @@ export function History() {
         setSelectedItem(null);
       }
       showToast('success', 'Analysis deleted successfully');
-    } catch (error) {
+    } catch {
       showToast('error', 'Failed to delete analysis');
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../components/Toast';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +12,7 @@ export function Login() {
   const location = useLocation();
   const { showToast } = useToast();
 
-  const from = (location.state as any)?.from?.pathname || '/tailor';
+  const from = (location.state as { from?: { pathname: string } } | undefined)?.from?.pathname || '/tailor';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,8 +21,9 @@ export function Login() {
       await login(email, password);
       showToast('success', 'Welcome back');
       navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed';
+      setError(message);
       showToast('error', 'Login failed');
     }
   };

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useToast } from '../components/Toast';
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
 
 export function Register() {
   const [email, setEmail] = useState('');
@@ -18,8 +18,9 @@ export function Register() {
       await registerUser(email, password);
       showToast('success', 'Account created');
       navigate('/tailor');
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setError(message);
       showToast('error', 'Registration failed');
     }
   };

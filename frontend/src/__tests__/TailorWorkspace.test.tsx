@@ -1,12 +1,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { vi } from 'vitest';
 import { TailorWorkspace } from '../pages/TailorWorkspace';
 import { ThemeProvider } from '../contexts/ThemeContext';
+import { api } from '../services/api';
 
 // Mock the toast hook
-const mockShowToast = jest.fn();
-jest.mock('../components/Toast', () => ({
+const mockShowToast = vi.fn();
+vi.mock('../hooks/useToast', () => ({
   useToast: () => ({
     showToast: mockShowToast,
     ToastContainer: () => <div data-testid="toast-container" />
@@ -14,9 +16,9 @@ jest.mock('../components/Toast', () => ({
 }));
 
 // Mock the API
-jest.mock('../services/api', () => ({
+vi.mock('../services/api', () => ({
   api: {
-    analyze: jest.fn().mockResolvedValue({
+    analyze: vi.fn().mockResolvedValue({
       id: '1',
       score: 85,
       matchedSkills: ['React', 'TypeScript', 'Node.js'],
@@ -43,7 +45,7 @@ const renderWithProviders = (component: React.ReactElement) => {
 
 describe('TailorWorkspace', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     localStorage.clear();
   });
 
@@ -85,7 +87,6 @@ describe('TailorWorkspace', () => {
   });
 
   test('successfully analyzes resume and shows results', async () => {
-    const { api } = require('../services/api');
     renderWithProviders(<TailorWorkspace />);
     
     const resumeTextarea = screen.getByPlaceholderText('Paste your resume content here...');
