@@ -9,7 +9,7 @@
     "rewrites": [
       {
         "source": "/api/**",
-        "destination": "https://your-api.vercel.app/api/"
+        "destination": "http://localhost:8000/api/"
       }
     ]
   }

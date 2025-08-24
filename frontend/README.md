@@ -32,6 +32,14 @@ ResumeBoost is a modern web application that helps job seekers optimize their re
 
 ### Installation & Running
 
+Create an `.env` file to configure the backend URL if needed:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+If not set, the app will default to `http://localhost:8000`.
+
 1. **Start the development server**:
    ```bash
    npm run dev
