@@ -96,3 +96,4 @@ jobs:
           projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels
+          

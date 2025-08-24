@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 import asyncio
 
-from .analyzer import timed_analysis
+from backend.analyzer import timed_analysis
 from .database import Base, engine, SessionLocal
 from .models import User, Analysis
 from .auth import (
