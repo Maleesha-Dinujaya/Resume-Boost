@@ -6,7 +6,8 @@ python-jose==3.3.0  # JWT authentication (optional)
 passlib==1.7.4  # Password hashing (optional)
 
 # AI/ML & NLP
-torch==2.1.2+cpu --extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.1.2
 spacy==3.7.4
 nltk==3.8.1
 scikit-learn  # For advanced scoring
