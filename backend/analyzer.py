@@ -279,7 +279,7 @@ def calculate_scores(
     """Compute overall score, breakdown, matched/missing skills and suggestions."""
 
     jd_sents = split_sents(job_text)
-    vectorizer = TfidfVectorizer().fit(jd_sents or [job_text])
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2)).fit(jd_sents or [job_text])
     tfidf_matrix = vectorizer.transform(jd_sents or [job_text])
 
     priority = set()
@@ -291,15 +291,20 @@ def calculate_scores(
     # Skill weights via TF-IDF
     skill_weights: Dict[str, float] = {}
     for skill in job_skills:
-        tokens = [t.lower() for t in skill.split()]
+        key = skill.lower()
+        tokens = key.split()
         weight = 0.0
-        for t in tokens:
-            idx = vectorizer.vocabulary_.get(t)
-            if idx is not None:
-                weight = max(weight, float(tfidf_matrix[:, idx].max()))
+        phrase_idx = vectorizer.vocabulary_.get(key)
+        if phrase_idx is not None:
+            weight += float(tfidf_matrix[:, phrase_idx].max())
+        if phrase_idx is None or len(tokens) > 1:
+            for t in tokens:
+                idx = vectorizer.vocabulary_.get(t)
+                if idx is not None:
+                    weight += float(tfidf_matrix[:, idx].max())
         if weight == 0.0:
             weight = 0.1
-        if skill.lower() in priority:
+        if key in priority:
             weight *= 1.3
         skill_weights[skill] = weight
 
