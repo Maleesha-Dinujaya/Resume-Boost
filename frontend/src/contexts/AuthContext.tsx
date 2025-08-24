@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, setAuthToken as apiSetAuthToken } from '../services/api';
 import { storage } from '../services/storage';
-import { AuthContext } from './authContext';
+import { AuthContext } from './auth-context';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(() => storage.getAuthToken());

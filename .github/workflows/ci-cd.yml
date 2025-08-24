@@ -29,8 +29,7 @@ jobs:
 
       - name: Verify backend setup
         run: |
-          cd backend
-          python -c "import app; print('Backend imports successful')"
+          python -c "from backend.main import app; print('Backend imports successful')"
 
   # Frontend Build & Test
   frontend:
