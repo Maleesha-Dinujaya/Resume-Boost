@@ -71,4 +71,18 @@ describe('Authentication flows', () => {
     await waitFor(() => expect(screen.getByText(/signed in as head@example.com/i)).toBeInTheDocument());
     expect(screen.getByText(/logout/i)).toBeInTheDocument();
   });
+
+  test('register page shows server error message', async () => {
+    (api.register as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Email already registered'));
+    const user = userEvent.setup();
+    window.history.pushState({}, '', '/register');
+    render(<App />);
+
+    await user.type(screen.getByLabelText(/email/i), 'dup@example.com');
+    await user.type(screen.getByLabelText(/password/i), 'pass');
+    await user.click(screen.getByRole('button', { name: /register/i }));
+
+    await waitFor(() => expect(api.register).toHaveBeenCalled());
+    expect(await screen.findByText(/email already registered/i)).toBeInTheDocument();
+  });
 });
