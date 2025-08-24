@@ -4,6 +4,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 import asyncio
+import os
 
 from backend.analyzer import timed_analysis
 from backend.database import Base, engine, SessionLocal
@@ -14,6 +15,7 @@ from backend.auth import (
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 app.add_middleware(
@@ -45,6 +47,13 @@ class TokenResponse(BaseModel):
 @app.get("/")
 def root():
     return {"message": "ResumeBoost backend is running"}
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon() -> FileResponse:
+    """Serve the favicon for Vercel deployments."""
+    file_path = os.path.join(os.path.dirname(__file__), "favicon.ico")
+    return FileResponse(file_path)
 
 # ---------- Auth ----------
 @app.post("/auth/register", status_code=201)
