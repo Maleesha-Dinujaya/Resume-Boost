@@ -28,6 +28,7 @@ describe('Integration Tests', () => {
 
   test('complete user flow: landing → tailor → analyze → results', async () => {
     const user = userEvent.setup();
+    localStorage.setItem('resumeBoost_auth', JSON.stringify({ token: 'test-token', email: 'test@example.com' }));
     render(<App />);
     
     // 1. Start on landing page

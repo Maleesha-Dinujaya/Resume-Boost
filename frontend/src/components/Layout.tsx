@@ -170,6 +170,14 @@ export function Layout({ children }: LayoutProps) {
               >
                 How It Works
               </Link>
+              <a
+                href="https://github.com/Maleesha-Dinujaya"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-gray-600 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 transition-colors"
+              >
+                Maleesha Dinujaya
+              </a>
             </div>
           </div>
         </div>

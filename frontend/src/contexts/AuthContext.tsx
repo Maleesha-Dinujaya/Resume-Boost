@@ -14,6 +14,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   const login = async (email: string, password: string) => {
+    storage.clear();
     const res = await api.login(email, password);
     setToken(res.access_token);
     setUserEmail(email);
@@ -21,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (email: string, password: string) => {
+    storage.clear();
     const res = await api.register(email, password);
     setToken(res.access_token);
     setUserEmail(email);
