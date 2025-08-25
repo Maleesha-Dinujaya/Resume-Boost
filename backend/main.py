@@ -5,11 +5,16 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 import asyncio
 import os
+from pathlib import Path
+import sys
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+if __package__ in (None, ""):
+    __package__ = "backend"
 
-from backend.analyzer import timed_analysis
-from backend.database import Base, engine, SessionLocal
-from backend.models import User, Analysis
-from backend.auth import (
+from .analyzer import timed_analysis
+from .database import Base, engine, SessionLocal
+from .models import User, Analysis
+from .auth import (
     get_db, hash_password, verify_password,
     create_access_token, get_current_user
 )
