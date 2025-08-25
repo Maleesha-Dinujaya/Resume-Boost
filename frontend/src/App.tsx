@@ -4,7 +4,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { Layout } from './components/Layout';
 import { RequireAuth } from './components/RequireAuth';
-import { useToast } from './hooks/useToast';
+import { ToastProvider } from './hooks/useToast';
 import { Landing } from './pages/Landing';
 import { TailorWorkspace } from './pages/TailorWorkspace';
 import { History } from './pages/History';
@@ -15,39 +15,30 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { storage } from './services/storage';
 
-function AppContent() {
-  const { ToastContainer } = useToast();
-  
-  return (
-    <>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/tailor" element={<RequireAuth><TailorWorkspace /></RequireAuth>} />
-          <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
-      <ToastContainer />
-    </>
-  );
-}
-
 function App() {
   useEffect(() => {
     storage.clear();
   }, []);
   return (
     <ThemeProvider>
-      <Router>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AuthProvider>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/tailor" element={<RequireAuth><TailorWorkspace /></RequireAuth>} />
+                <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </AuthProvider>
+        </Router>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

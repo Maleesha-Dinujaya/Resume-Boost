@@ -83,7 +83,8 @@ describe('Authentication flows', () => {
     await user.click(screen.getByRole('button', { name: /register/i }));
 
     await waitFor(() => expect(api.register).toHaveBeenCalled());
-    expect(await screen.findByText(/email already registered/i)).toBeInTheDocument();
+    const errors = await screen.findAllByText(/email already registered/i);
+    expect(errors.length).toBeGreaterThan(0);
   });
 
   test('keeps user signed in on refresh even if token verification fails', async () => {
