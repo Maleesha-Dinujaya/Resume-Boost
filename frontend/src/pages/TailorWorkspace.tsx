@@ -39,17 +39,38 @@ export function TailorWorkspace() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (file.type !== 'text/plain') {
-      showToast('error', 'Please upload a plain text (.txt) file');
-      return;
-    }
+    if (file.type === 'application/pdf') {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const pdfjsLib = await import('pdfjs-dist');
+          const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.js?url');
+          pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      setResumeText(text);
-    };
-    reader.readAsText(file);
+          const typedarray = new Uint8Array(e.target?.result as ArrayBuffer);
+          const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+          let text = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += (content.items as any[]).map(item => (item as any).str).join(' ') + '\n';
+          }
+          setResumeText(text);
+        } catch {
+          showToast('error', 'Failed to read PDF file');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else if (file.type === 'text/plain') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        setResumeText(text);
+      };
+      reader.readAsText(file);
+    } else {
+      showToast('error', 'Please upload a plain text (.txt) or PDF (.pdf) file');
+    }
   };
 
   const handleAnalyze = async () => {
@@ -204,12 +225,12 @@ export function TailorWorkspace() {
                     id="resume-upload"
                     type="file"
                     className="hidden"
-                    accept=".txt"
+                    accept=".txt,.pdf"
                     onChange={handleFileUpload}
                   />
                 </label>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Plain text files (.txt) only
+                  Plain text or PDF files (.txt, .pdf) only
                 </p>
               </div>
             ) : (
