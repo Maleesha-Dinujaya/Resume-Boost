@@ -46,12 +46,14 @@ export function TailorWorkspace() {
           const pdfjsLib = await import('pdfjs-dist');
           let workerSrc = '';
           try {
-            const workerModule = 'pdfjs-dist/build/pdf.worker.min.js?url';
-            const pdfjsWorker = await import(workerModule);
-            workerSrc = (pdfjsWorker as any).default;
-          } catch {
-            workerSrc = '';
-          }
+              const workerModule = "pdfjs-dist/build/pdf.worker.min.js?url";
+              // Vite will ignore this dynamic import during the analysis
+              const pdfjsWorker = await import(/* @vite-ignore */ workerModule);
+              workerSrc = pdfjsWorker.default;
+            } catch {
+              // Handle the error if necessary
+              workerSrc = '';
+            }
           pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
           const typedarray = new Uint8Array(e.target?.result as ArrayBuffer);
