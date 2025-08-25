@@ -13,6 +13,7 @@ import { Privacy } from './pages/Privacy';
 import { NotFound } from './pages/NotFound';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { RewriteBullet } from './pages/RewriteBullet';
 import { storage } from './services/storage';
 
 function AppContent() {
@@ -27,6 +28,7 @@ function AppContent() {
           <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/rewrite" element={<RewriteBullet />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="*" element={<NotFound />} />
