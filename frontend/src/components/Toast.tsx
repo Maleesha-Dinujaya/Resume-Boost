@@ -7,9 +7,10 @@ interface ToastProps {
   type: ToastType;
   message: string;
   onClose: () => void;
+  style?: React.CSSProperties;
 }
 
-export function Toast({ type, message, onClose }: ToastProps) {
+export function Toast({ type, message, onClose, style }: ToastProps) {
   React.useEffect(() => {
     const timer = setTimeout(onClose, 5000);
     return () => clearTimeout(timer);
@@ -30,7 +31,10 @@ export function Toast({ type, message, onClose }: ToastProps) {
   const Icon = icons[type];
 
   return (
-    <div className={`fixed top-4 right-4 z-50 max-w-sm w-full border rounded-lg p-4 shadow-lg transition-all transform ${styles[type]}`}>
+    <div
+      className={`z-50 max-w-sm w-full border rounded-lg p-4 shadow-lg transition-all transform ${styles[type]}`}
+      style={style}
+    >
       <div className="flex items-start">
         <Icon className="h-5 w-5 flex-shrink-0 mr-3 mt-0.5" />
         <p className="text-sm font-medium flex-1">{message}</p>
