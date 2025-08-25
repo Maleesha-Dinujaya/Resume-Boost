@@ -17,6 +17,7 @@ export interface AnalyzeResponse {
   breakdown?: { skill_match: number; semantic_similarity: number; ats_optimization: number };
   weakRequirements?: string[];
   evidence?: { jd: string; resume: string; similarity: number }[];
+  grammarSuggestions?: { issue: string; replacement: string }[];
 }
 
 export interface RewriteResponse {
@@ -51,6 +52,10 @@ export interface HistoryDetail extends AnalyzeResponse {
   createdAt: string;
   resumePreview?: string;
   jobTitle?: string;
+}
+
+export interface SummarizeResponse {
+  summary: string;
 }
 
 export interface AuthResponse {
@@ -174,5 +179,17 @@ export const api = {
     if (!response.ok) {
       throw new Error('Failed to delete analysis');
     }
+  },
+
+  async summarize(text: string): Promise<SummarizeResponse> {
+    const response = await fetch(`${API_BASE_URL}/summarize`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to summarize text');
+    }
+    return response.json();
   },
 };

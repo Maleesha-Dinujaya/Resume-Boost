@@ -14,6 +14,7 @@ from .auth import (
     get_db, hash_password, verify_password,
     create_access_token, get_current_user
 )
+from .summary import summarize_text
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import FileResponse
@@ -48,6 +49,10 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+
+class SummarizeRequest(BaseModel):
+    text: str
+
 # ---------- Health ----------
 @app.get("/")
 def root():
@@ -61,11 +66,21 @@ async def favicon() -> FileResponse:
     return FileResponse(file_path)
 
 
+# ---------- Paraphrasing and Rewrite ----------
 @app.post("/rewrite")
 async def rewrite_endpoint(req: RewriteRequest):
     if not req.text.strip():
         raise HTTPException(status_code=400, detail="Text is required")
     return {"alternatives": rewrite_bullet(req.text)}
+
+# ---------- Summarization ----------
+@app.post("/summarize")
+def summarize(data: SummarizeRequest):
+    if not data.text.strip():
+        raise HTTPException(status_code=400, detail="Text is required")
+    summary = summarize_text(data.text)
+    return {"summary": summary}
+
 
 # ---------- Auth ----------
 @app.post("/auth/register", status_code=201)
@@ -129,6 +144,7 @@ async def analyze_resume(req: AnalysisRequest, db: Session = Depends(get_db), me
         "breakdown": result.get("breakdown"),
         "weakRequirements": result.get("weak_requirements"),
         "evidence": result.get("evidence"),
+        "grammarSuggestions": result.get("grammar"),
     }
 
 @app.get("/history")

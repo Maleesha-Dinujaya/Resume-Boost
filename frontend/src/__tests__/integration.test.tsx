@@ -12,7 +12,8 @@ vi.mock('../services/api', () => ({
       score: 85,
       matchedSkills: ['React', 'TypeScript'],
       improvementAreas: ['Add more metrics'],
-      highlights: ['Built React applications']
+      highlights: ['Built React applications'],
+      grammarSuggestions: []
     }),
     getHistory: vi.fn().mockResolvedValue({ items: [] }),
     verifyToken: vi.fn().mockResolvedValue({ email: 'test@example.com' })

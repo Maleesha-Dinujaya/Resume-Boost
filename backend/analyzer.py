@@ -18,6 +18,10 @@ try:  # pragma: no cover - keyword extraction via GitHub project FlashText
     from flashtext import KeywordProcessor
 except Exception:  # pragma: no cover
     KeywordProcessor = None  # type: ignore
+try:  # pragma: no cover - grammar checking
+    import language_tool_python
+except Exception:  # pragma: no cover
+    language_tool_python = None  # type: ignore
 from sklearn.feature_extraction.text import TfidfVectorizer
 from spacy.language import Language
 # Add skill synonyms mapping
@@ -208,10 +212,30 @@ def prioritize_missing(job_skills: List[str], resume_skills: List[str], job_text
 
 
 # ---------------------------------------------------------------------------
+# Grammar checking
+# ---------------------------------------------------------------------------
+
+def grammar_check(text: str) -> List[Dict[str, str]]:
+    """Return grammar issues with suggested replacements."""
+    if language_tool_python is None:
+        return []
+    try:
+        tool = language_tool_python.LanguageTool("en-US")
+        matches = tool.check(text)
+    except Exception:
+        return []
+    issues: List[Dict[str, str]] = []
+    for m in matches[:5]:
+        replacement = m.replacements[0] if m.replacements else ""
+        issues.append({"issue": m.message, "replacement": replacement})
+    return issues
+
+
+# ---------------------------------------------------------------------------
 # ATS optimisation
 # ---------------------------------------------------------------------------
 
-def ats_analysis(resume_text: str, job_skills: List[str]) -> Tuple[float, List[str]]:
+def ats_analysis(resume_text: str, job_skills: List[str]) -> Tuple[float, List[str], List[Dict[str, str]]]:
     """Compute ATS compliance score and suggestions."""
     suggestions: List[str] = []
     total_score = 0.0
@@ -256,7 +280,8 @@ def ats_analysis(resume_text: str, job_skills: List[str]) -> Tuple[float, List[s
         total_score += 2
         suggestions.append("Include Education and Experience sections")
 
-    return total_score, suggestions
+    grammar = grammar_check(resume_text)
+    return total_score, suggestions, grammar
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +303,7 @@ def calculate_scores(
     List[str],
     List[str],
     List[Tuple[str, str, float]],
+    List[Dict[str, str]],
 ]:
     """Compute overall score, breakdown, matched/missing skills and suggestions."""
 
@@ -346,7 +372,7 @@ def calculate_scores(
     semantic_score = combined_sem * 30
 
     # ATS analysis
-    ats_score, ats_suggestions = ats_analysis(resume_text, job_skills)
+    ats_score, ats_suggestions, grammar = ats_analysis(resume_text, job_skills)
 
     # Missing skills priority
     missing = prioritize_missing(job_skills, resume_skills, job_text)
@@ -374,6 +400,7 @@ def calculate_scores(
         suggestions,
         embed["weak_requirements"],
         support,
+        grammar,
     )
 
 
@@ -398,6 +425,7 @@ async def perform_analysis(
         suggestions,
         weak_requirements,
         support,
+        grammar,
     ) = calculate_scores(
         job_skills,
         resume_skills,
@@ -417,6 +445,7 @@ async def perform_analysis(
         "suggestions": suggestions,
         "weak_requirements": weak_requirements,
         "evidence": evidence,
+        "grammar": grammar,
     }
 
 
