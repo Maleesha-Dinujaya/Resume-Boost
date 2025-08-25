@@ -24,11 +24,13 @@ export function TailorWorkspace() {
   const [targetRole, setTargetRole] = useState('');
   const [seniority, setSeniority] = useState('');
   const [emphasis, setEmphasis] = useState<string[]>([]);
-  
+
   // UI state
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [inputMethod, setInputMethod] = useState<'upload' | 'paste'>('paste');
+  const [summary, setSummary] = useState('');
+  const [isSummarizing, setIsSummarizing] = useState(false);
   
   // Clear any saved data on mount
   useEffect(() => {
@@ -122,6 +124,7 @@ export function TailorWorkspace() {
     setSeniority('');
     setEmphasis([]);
     setResult(null);
+    setSummary('');
     storage.clear();
     showToast('success', 'Form cleared successfully');
   };
@@ -182,6 +185,24 @@ export function TailorWorkspace() {
   };
 
   const emphasisOptions = ['Leadership', 'Technical Skills', 'Communication', 'Problem Solving', 'Teamwork', 'Innovation'];
+
+  const handleSummarize = async () => {
+    if (!jobDescription.trim()) {
+      showToast('error', 'Please provide the job description');
+      return;
+    }
+
+    setIsSummarizing(true);
+    try {
+      const response = await api.summarize(jobDescription.trim());
+      setSummary(response.summary);
+      showToast('success', 'Summary generated');
+    } catch {
+      showToast('error', 'Failed to summarize text');
+    } finally {
+      setIsSummarizing(false);
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -254,7 +275,7 @@ export function TailorWorkspace() {
             )}
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Job Description</h2>
             <textarea
               value={jobDescription}
@@ -262,6 +283,28 @@ export function TailorWorkspace() {
               placeholder="Paste the job description here..."
               className="w-full h-32 p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
+            <div className="flex justify-end mt-2">
+              <button
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg flex items-center"
+              >
+                {isSummarizing ? (
+                  <>
+                    <Loader className="h-4 w-4 mr-2 animate-spin" />
+                    Summarizing...
+                  </>
+                ) : (
+                  'Summarize'
+                )}
+              </button>
+            </div>
+            {summary && (
+              <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Summary</h3>
+                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">{summary}</p>
+              </div>
+            )}
           </div>
 
           {/* Optional fields */}
