@@ -15,6 +15,10 @@ interface AnalysisResult {
   evidence?: { jd: string; resume: string; similarity: number }[];
 }
 
+interface PDFTextItem {
+  str: string;
+}
+
 export function TailorWorkspace() {
   const { showToast } = useToast();
   
@@ -47,8 +51,8 @@ export function TailorWorkspace() {
           let workerSrc = '';
           try {
             const workerModule = 'pdfjs-dist/build/pdf.worker.min.js?url';
-            const pdfjsWorker = await import(workerModule);
-            workerSrc = (pdfjsWorker as any).default;
+            const pdfjsWorker = (await import(workerModule)) as { default: string };
+            workerSrc = pdfjsWorker.default;
           } catch {
             workerSrc = '';
           }
@@ -60,7 +64,8 @@ export function TailorWorkspace() {
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            text += (content.items as any[]).map(item => (item as any).str).join(' ') + '\n';
+            const items = content.items as PDFTextItem[];
+            text += items.map(item => item.str).join(' ') + '\n';
           }
           setResumeText(text);
           showToast('success', 'File uploaded successfully');
