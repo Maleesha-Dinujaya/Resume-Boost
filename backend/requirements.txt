@@ -14,6 +14,8 @@ scikit-learn  # For advanced scoring
 pandas  # Data processing (optional)
 sentence-transformers>=2.7.0
 flashtext==2.7
+transformers==4.39.3
+sentencepiece==0.1.99
 
 language-tool-python==2.7.1
 transformers==4.38.1

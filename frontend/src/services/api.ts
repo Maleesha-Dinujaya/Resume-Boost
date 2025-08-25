@@ -20,6 +20,10 @@ export interface AnalyzeResponse {
   grammarSuggestions?: { issue: string; replacement: string }[];
 }
 
+export interface RewriteResponse {
+  alternatives: string[];
+}
+
 // Token plumbing
 let authToken: string | null = storage.getAuthToken();
 export function setAuthToken(token: string | null) {
@@ -129,6 +133,18 @@ export const api = {
       throw new Error('Failed to analyze resume');
     }
 
+    return response.json();
+  },
+
+  async rewriteBullet(text: string): Promise<RewriteResponse> {
+    const response = await fetch(`${API_BASE_URL}/rewrite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (!response.ok) {
+      throw new Error('Failed to rewrite bullet');
+    }
     return response.json();
   },
 

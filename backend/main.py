@@ -7,6 +7,7 @@ import asyncio
 import os
 
 from .analyzer import timed_analysis
+from .rewrite import rewrite_bullet
 from .database import Base, engine, SessionLocal
 from .models import User, Analysis
 from .auth import (
@@ -40,6 +41,10 @@ class RegisterRequest(BaseModel):
     email: str
     password: str
 
+
+class RewriteRequest(BaseModel):
+    text: str
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
@@ -61,6 +66,13 @@ async def favicon() -> FileResponse:
     return FileResponse(file_path)
 
 
+# ---------- Paraphrasing and Rewrite ----------
+@app.post("/rewrite")
+async def rewrite_endpoint(req: RewriteRequest):
+    if not req.text.strip():
+        raise HTTPException(status_code=400, detail="Text is required")
+    return {"alternatives": rewrite_bullet(req.text)}
+
 # ---------- Summarization ----------
 @app.post("/summarize")
 def summarize(data: SummarizeRequest):
@@ -68,6 +80,7 @@ def summarize(data: SummarizeRequest):
         raise HTTPException(status_code=400, detail="Text is required")
     summary = summarize_text(data.text)
     return {"summary": summary}
+
 
 # ---------- Auth ----------
 @app.post("/auth/register", status_code=201)
