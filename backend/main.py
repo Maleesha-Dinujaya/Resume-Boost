@@ -131,6 +131,7 @@ async def analyze_resume(req: AnalysisRequest, db: Session = Depends(get_db), me
         "breakdown": result.get("breakdown"),
         "weakRequirements": result.get("weak_requirements"),
         "evidence": result.get("evidence"),
+        "grammarSuggestions": result.get("grammar"),
     }
 
 @app.get("/history")

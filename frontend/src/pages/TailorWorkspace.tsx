@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, FileText, Loader, RefreshCw, Copy, Download, Star, AlertTriangle } from 'lucide-react';
+import { Upload, FileText, Loader, RefreshCw, Copy, Download, Star, AlertTriangle, SpellCheck } from 'lucide-react';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
 import { useToast } from '../hooks/useToast';
@@ -13,6 +13,7 @@ interface AnalysisResult {
   breakdown?: { skill_match: number; semantic_similarity: number; ats_optimization: number };
   weakRequirements?: string[];
   evidence?: { jd: string; resume: string; similarity: number }[];
+  grammarSuggestions?: { issue: string; replacement: string }[];
 }
 
 export function TailorWorkspace() {
@@ -576,6 +577,26 @@ export function TailorWorkspace() {
                   ))}
                 </ul>
               </div>
+
+              {/* Grammar Suggestions */}
+              {result.grammarSuggestions && result.grammarSuggestions.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                    <SpellCheck className="h-5 w-5 text-purple-500 mr-2" />
+                    Grammar Suggestions
+                  </h3>
+                  <ul className="space-y-2">
+                    {result.grammarSuggestions.map((g, index) => (
+                      <li key={index} className="flex items-start">
+                        <span className="flex-shrink-0 w-2 h-2 bg-purple-400 rounded-full mt-2 mr-3"></span>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {g.issue}{g.replacement ? ` → ${g.replacement}` : ''}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Suggested Highlights */}
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">

@@ -17,6 +17,7 @@ export interface AnalyzeResponse {
   breakdown?: { skill_match: number; semantic_similarity: number; ats_optimization: number };
   weakRequirements?: string[];
   evidence?: { jd: string; resume: string; similarity: number }[];
+  grammarSuggestions?: { issue: string; replacement: string }[];
 }
 
 // Token plumbing
