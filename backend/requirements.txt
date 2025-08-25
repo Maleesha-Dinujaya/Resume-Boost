@@ -18,7 +18,6 @@ transformers==4.39.3
 sentencepiece==0.1.99
 
 language-tool-python==2.7.1
-transformers==4.38.1
 
 
 # Database
