@@ -13,6 +13,7 @@ from .auth import (
     get_db, hash_password, verify_password,
     create_access_token, get_current_user
 )
+from .summary import summarize_text
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import FileResponse
@@ -43,6 +44,10 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+
+class SummarizeRequest(BaseModel):
+    text: str
+
 # ---------- Health ----------
 @app.get("/")
 def root():
@@ -54,6 +59,15 @@ async def favicon() -> FileResponse:
     """Serve the favicon for Vercel deployments."""
     file_path = os.path.join(os.path.dirname(__file__), "favicon.ico")
     return FileResponse(file_path)
+
+
+# ---------- Summarization ----------
+@app.post("/summarize")
+def summarize(data: SummarizeRequest):
+    if not data.text.strip():
+        raise HTTPException(status_code=400, detail="Text is required")
+    summary = summarize_text(data.text)
+    return {"summary": summary}
 
 # ---------- Auth ----------
 @app.post("/auth/register", status_code=201)
