@@ -13,18 +13,22 @@ export function useToast() {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
-  const ToastContainer = React.useCallback(() => (
-    <>
-      {toasts.map(toast => (
-        <Toast
-          key={toast.id}
-          type={toast.type}
-          message={toast.message}
-          onClose={() => removeToast(toast.id)}
-        />
-      ))}
-    </>
-  ), [toasts, removeToast]);
+  const ToastContainer = React.useCallback(
+    () => (
+      <>
+        {toasts.map((toast, index) => (
+          <Toast
+            key={toast.id}
+            type={toast.type}
+            message={toast.message}
+            onClose={() => removeToast(toast.id)}
+            style={{ position: 'fixed', right: 16, top: index * 60 + 16 }}
+          />
+        ))}
+      </>
+    ),
+    [toasts, removeToast]
+  );
 
   return { showToast, ToastContainer };
 }
