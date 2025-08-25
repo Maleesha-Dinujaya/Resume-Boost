@@ -44,8 +44,15 @@ export function TailorWorkspace() {
       reader.onload = async (e) => {
         try {
           const pdfjsLib = await import('pdfjs-dist');
-          const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.js?url');
-          pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+          let workerSrc = '';
+          try {
+            const workerModule = 'pdfjs-dist/build/pdf.worker.min.js?url';
+            const pdfjsWorker = await import(workerModule);
+            workerSrc = (pdfjsWorker as any).default;
+          } catch {
+            workerSrc = '';
+          }
+          pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc;
 
           const typedarray = new Uint8Array(e.target?.result as ArrayBuffer);
           const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
@@ -56,6 +63,7 @@ export function TailorWorkspace() {
             text += (content.items as any[]).map(item => (item as any).str).join(' ') + '\n';
           }
           setResumeText(text);
+          showToast('success', 'File uploaded successfully');
         } catch {
           showToast('error', 'Failed to read PDF file');
         }
@@ -66,6 +74,7 @@ export function TailorWorkspace() {
       reader.onload = (e) => {
         const text = e.target?.result as string;
         setResumeText(text);
+        showToast('success', 'File uploaded successfully');
       };
       reader.readAsText(file);
     } else {
