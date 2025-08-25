@@ -29,6 +29,9 @@ jobs:
       - name: Verify backend setup
         run: PYTHONPATH=$GITHUB_WORKSPACE python -c "from api.main import app; print('Backend imports successful')"
 
+      - name: Run backend tests
+        run: PYTHONPATH=$GITHUB_WORKSPACE python -m pytest backend/tests -q
+
   # Frontend Build & Test
   frontend:
     runs-on: ubuntu-latest
@@ -57,6 +60,11 @@ jobs:
         run: |
           cd frontend
           npm run lint
+
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test -- --run
 
   # Deploy to Firebase
   deploy:
