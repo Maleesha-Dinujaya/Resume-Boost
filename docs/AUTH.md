@@ -14,9 +14,9 @@ The ResumeBoost frontend now provides end-to-end authentication against the Fast
 4. Logging out clears the token and redirects to the landing page.
 
 ## Local Testing
-1. **Start backend**: `uvicorn backend.main:app --reload` (port 8000).
-2. **Start frontend**: from `frontend` run `npm install` then `npm run dev` (port 5173).
-3. Visit `http://localhost:5173/register` or `/login` to create an account and sign in.
+1. **Start backend**: `uvicorn backend.main:app --reload --port 8080`.
+2. **Start frontend**: from `frontend` run `npm ci` then `npm run build` and `npm run preview` (port 4173).
+3. Visit `http://localhost:4173/register` or `/login` to create an account and sign in.
 4. After authentication you can access `/history`; logging out will protect it again.
 
 E2E tests using Playwright are available in `frontend/e2e/auth.spec.ts`.

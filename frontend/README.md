@@ -35,17 +35,23 @@ ResumeBoost is a modern web application that helps job seekers optimize their re
 Create an `.env` file to configure the backend URL if needed:
 
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8080
 ```
 
-If not set, the app will default to `http://localhost:8000`.
+If not set, the app will default to `http://localhost:8080`.
 
-1. **Start the development server**:
+1. **Install dependencies**:
    ```bash
-   npm run dev
+   npm ci
    ```
 
-2. **Open your browser** and navigate to the provided local server URL (typically `http://localhost:5173`)
+2. **Build and preview the app**:
+   ```bash
+   npm run build
+   npm run preview
+   ```
+
+3. **Open your browser** and navigate to the provided local server URL (typically `http://localhost:4173`)
 
 3. **Start using the app**:
    - Visit the landing page to learn about ResumeBoost
@@ -87,7 +93,7 @@ src/
 
 ## API Integration
 
-The frontend communicates with a FastAPI backend (default `http://localhost:8000`).
+The frontend communicates with a FastAPI backend (default `http://localhost:8080`).
 
 ### Available Endpoints
 - `POST /analyze` - Analyze resume vs job description

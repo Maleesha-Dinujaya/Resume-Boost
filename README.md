@@ -19,7 +19,7 @@
  
 ```bash
 pip install -r requirements.txt
-uvicorn api.main:app --reload
+uvicorn backend.main:app --reload --port 8080
 ```
  
- The frontend can be started from the `frontend` directory with `npm install` and `npm run dev`.
+The frontend can be started from the `frontend` directory with `npm ci`, `npm run build`, and `npm run preview`.
