@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Trash2, Eye, FileText, Loader, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
@@ -29,11 +29,7 @@ export function History() {
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
-
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       const response = await api.getHistory();
       setItems(response.items);
@@ -42,7 +38,11 @@ export function History() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const loadDetail = async (id: string) => {
     setDetailLoading(true);
