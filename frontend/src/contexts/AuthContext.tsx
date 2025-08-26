@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       api
         .verifyToken()
         .then((res) => {
-          setUserEmail(res.email || userEmail);
+          setUserEmail((prev) => res.email || prev);
         })
         .catch((err) => {
           // If token verification fails (e.g. network issues), keep the user logged in
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else {
       setInitializing(false);
     }
-  }, []);
+  }, [token]);
 
   return (
     <AuthContext.Provider value={{ token, userEmail, login, register, logout, initializing }}>

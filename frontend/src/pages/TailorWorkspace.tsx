@@ -65,7 +65,8 @@ export function TailorWorkspace() {
           for (let i = 1; i <= pdf.numPages; i++) {
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            text += (content.items as any[]).map(item => (item as any).str).join(' ') + '\n';
+            const items = content.items as Array<{ str: string }>;
+            text += items.map(item => item.str).join(' ') + '\n';
           }
           setResumeText(text);
           showToast('success', 'File uploaded successfully');
