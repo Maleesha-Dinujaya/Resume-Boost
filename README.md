@@ -26,7 +26,7 @@ Pick one of the two ways to run the project:
 Open a terminal and run:
 
 ```bash
-git clone https://github.com/some-user/Resume-Boost.git
+git clone https://github.com/Maleesha-Dinujaya/Resume-Boost
 cd Resume-Boost
 ```
 
