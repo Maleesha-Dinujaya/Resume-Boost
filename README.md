@@ -127,6 +127,24 @@ Resume-Boost/
 ├── docker-compose.yml
 └── README.md
 ```
+---
+## 9. Create an account and sign in
+1. After the servers are running, open <http://localhost:5173/register>.
+2. Enter an **email** and **password** then click **Create Account**. You are now logged in.
+3. To sign in later, visit <http://localhost:5173/login>, use the same email and password, and press **Log In**.
+4. When signed in, the top bar shows your email and a **Logout** button.
+<img width="1918" height="750" alt="image" src="https://github.com/user-attachments/assets/805bbaa0-621a-4f06-a4a2-b3cbea162620" />
+
+---
+
+## 10. Use the app
+1. Visit <http://localhost:5173>.
+2. Paste or upload your resume and the job description.
+3. Click the **Analyze** button.
+4. Read the score and suggestions to improve the resume.
+<img width="1902" height="665" alt="image" src="https://github.com/user-attachments/assets/02a2d6dd-c1a2-4a12-9ccc-a2a1f6c6587d" />
+
+---
 
 Enjoy improving your resume!
 
