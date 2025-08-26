@@ -2,7 +2,7 @@ import pytest
 import requests
 
 # Endpoint and payload matching `AnalysisRequest`
-URL = "http://localhost:8000/analyze"
+URL = "http://localhost:8080/analyze"
 PAYLOAD = {
     "resume_text": "I am a Python developer with React experience.",
     "job_description": "Looking for a senior Python backend engineer with Docker.",
@@ -11,8 +11,8 @@ PAYLOAD = {
 
 def get_access_token(email: str = "test@example.com", password: str = "testpass") -> str:
     """Obtain an access token, registering the user if necessary."""
-    login_url = "http://localhost:8000/auth/login"
-    register_url = "http://localhost:8000/auth/register"
+    login_url = "http://localhost:8080/auth/login"
+    register_url = "http://localhost:8080/auth/register"
 
     # First attempt to log in with form data
     resp = requests.post(
@@ -39,12 +39,12 @@ def get_access_token(email: str = "test@example.com", password: str = "testpass"
 
 
 # Manual test:
-# curl -X POST http://localhost:8000/auth/register \
+# curl -X POST http://localhost:8080/auth/register \
 #     -H "Content-Type: application/json" \
 #     -d '{"email": "test@example.com", "password": "testpass"}'
-# TOKEN=$(curl -s -X POST http://localhost:8000/auth/login \
+# TOKEN=$(curl -s -X POST http://localhost:8080/auth/login \
 #     -d "username=test@example.com" -d "password=testpass" | jq -r '.access_token')
-# curl -X POST http://localhost:8000/analyze \
+# curl -X POST http://localhost:8080/analyze \
 #     -H "Authorization: Bearer $TOKEN" \
 #     -H "Content-Type: application/json" \
 #     -d '{"resume_text": "I am a Python developer with React experience.", \
@@ -57,7 +57,7 @@ def test_analyze_endpoint():
         headers = {"Authorization": f"Bearer {token}"}
         resp = requests.post(URL, json=PAYLOAD, headers=headers, timeout=10)
     except requests.exceptions.ConnectionError:
-        pytest.skip("API server is not running at localhost:8000")
+        pytest.skip("API server is not running at localhost:8080")
 
     data = resp.json()
     print(data)

@@ -65,7 +65,7 @@ export interface AuthResponse {
 
 // Backend base URL (configurable via VITE_API_URL)
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export const api = {
   async login(email: string, password: string): Promise<AuthResponse> {
