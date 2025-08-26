@@ -1,4 +1,5 @@
 # Resume Boost
+<img width="1910" height="682" alt="image" src="https://github.com/user-attachments/assets/5ecc6534-6eed-48f0-9912-7b36c006f519" />
 
 Resume Boost is a friendly web app that checks how well a resume matches a job description.  It uses a **FastAPI** backend with machine‑learning models and a **React + Vite** frontend.
 
@@ -40,10 +41,13 @@ cd Resume-Boost
    docker-compose up --build
    ```
 3. Wait until you see messages saying the **frontend** is listening on port `5173` and the **backend** on port `8000`.
-4. Open a browser and visit:
+   <img width="1566" height="501" alt="image" src="https://github.com/user-attachments/assets/73f7ef27-2d6d-4391-9d6e-dfd6c74f3a43" />
+   <img width="1595" height="403" alt="image" src="https://github.com/user-attachments/assets/81b7bade-7ba2-42b6-9bfc-74eae41d621b" />
+
+5. Open a browser and visit:
    * Frontend: <http://localhost:5173>
    * API docs: <http://localhost:8000/docs>
-5. To stop everything press `Ctrl + C` in the terminal and run `docker-compose down`.
+6. To stop everything press `Ctrl + C` in the terminal and run `docker-compose down`.
 
 ---
 
@@ -52,15 +56,19 @@ cd Resume-Boost
 ### 4.1 Run the backend
 1. Create and activate a virtual environment (optional but recommended):
    ```bash
+   cd backend
    python -m venv .venv
    source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   #.\venv\Scripts\activate : File E:\SLTC\ICE\4th Year\Adv SE\ResumeBoost\backend\venv\Scripts\Activate.ps1 cannot be loaded because running scripts is disabled on this system.(if this error appears)
+   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
    ```
 2. Install backend packages:
    ```bash
    pip install -r requirements.txt
    ```
-3. Start the FastAPI server:
+3. Start the FastAPI server from the root:
    ```bash
+   cd ../.. (Should in the ResumeBoost Directory)
    uvicorn backend.main:app --reload --port 8000
    ```
    The API docs will now be at <http://localhost:8000/docs>.
