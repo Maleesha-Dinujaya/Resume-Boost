@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       api
         .verifyToken()
         .then((res) => {
-          setUserEmail((prev) => res.email || prev);
+          setUserEmail((prev) => prev ?? res.email ?? null);
         })
         .catch((err) => {
           // If token verification fails (e.g. network issues), keep the user logged in
